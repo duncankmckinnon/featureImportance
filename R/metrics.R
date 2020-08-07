@@ -8,16 +8,17 @@
 #' @param y the target
 #' @param metric used to determine importance ranking
 #' @param mod_type type of model used for y ~ X ( lm, glm )
+#' @param normalize whether the weights should be normalize (sum to 1), default = FALSE to maintain comparability
 #' @param ... other optional arguments to the model
 #'
-#' @return a named vector with the relative importance for each feature in X
+#' @return a named vector with the sorted relative importance (weights) for each feature in X
 #' @export
 #'
 #' @examples
 #' X <- mtcars[,-1]
 #' y <- mtcars[,1]
 #' GOFFI(X, y)
-GOFFI <- function( X, y, metric = c( 'residual', 'AIC', 'BIC' ), mod_type = c( 'lm', 'glm' ), ... ) {
+GOFFI <- function( X, y, metric = c( 'residual', 'AIC', 'BIC' ), mod_type = c( 'lm', 'glm' ), normalize = FALSE, ...) {
   ncols <- dim( X )[2]
   xcols <- if( !is.null( names( X ) ) ) { names( X ) } else { 1:ncols }
   FI <- stats::setNames( rep( 0, ncols ), xcols )
@@ -35,7 +36,11 @@ GOFFI <- function( X, y, metric = c( 'residual', 'AIC', 'BIC' ), mod_type = c( '
       FI[ xcol_i ] <- FI[ xcol_i ] + ( mod_weights[ xcol_i ] / mod_metric ) ^ 2
     }
   }
-  return( ( FI ^ 0.5 ) / ncols )
+  weights <- sort( ( FI ^ 0.5 ) / ncols, decreasing = TRUE )
+  if( normalize == TRUE ) {
+    weights <- weights/ sum( weights )
+  }
+  return( weights )
 }
 
 models <- function( name, mod_args = list() ){
