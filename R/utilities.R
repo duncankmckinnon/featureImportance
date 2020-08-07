@@ -115,7 +115,7 @@ format_formula <- function( y, xadd = NULL, xmultiply = NULL, xpower = NULL, pow
 }
 
 #' utility function for formatting sets of operations
-#' @keyword internal
+#' @keywords internal
 ops_util <- function( x, operator, n = 1 ) {
   if( is.list( x ) ) {
 
@@ -129,11 +129,11 @@ ops_util <- function( x, operator, n = 1 ) {
 }
 
 #' utility function for formatting single operation
-#' @keyword internal
+#' @keywords internal
 op_util <- function( x, operator, n = 1 ) remove_last_n( paste0( x, sep = operator, collapse = '' ), n )
 
 #' utility function for combining lists
-#' @keyword internal
+#' @keywords internal
 combine.lists <- function( list1, list2 ) {
   # Combine lists 'list1' and 'list2', giving precedence to elements found in 'list2':
   # that is, if $something is found in both 'list1' and 'list2',

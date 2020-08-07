@@ -13,3 +13,4 @@ Suggests:
     testthat
 Imports: 
     stringr
+RoxygenNote: 7.1.0
