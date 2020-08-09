@@ -6,7 +6,7 @@
 #' to the model goodness of fit for the set of all models with 1 feature excluded.
 #' @param X the features of the dataset
 #' @param y the target
-#' @param model type of model used for y ~ X ( lm, glm )
+#' @param model type of model used for y ~ X ( currently supports linear, logistic and randomforest models )
 #' @param metric used to determine importance ranking
 #' @param normalize whether the weights should be normalized (sum to 1), default = FALSE to maintain comparability
 #' @param ... other optional arguments to the model

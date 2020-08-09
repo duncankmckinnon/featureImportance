@@ -7,8 +7,9 @@
 GOFFI(
   X,
   y,
-  metric = c("residual", "AIC", "BIC"),
-  mod_type = c("lm", "glm"),
+  model = c("lm", "glm", "rf"),
+  metric = c("error", "AIC", "BIC"),
+  normalize = FALSE,
   ...
 )
 }
@@ -17,22 +18,28 @@ GOFFI(
 
 \item{y}{the target}
 
+\item{model}{type of model used for y ~ X ( currently supports linear, logistic and randomforest models )}
+
 \item{metric}{used to determine importance ranking}
 
-\item{mod_type}{type of model used for y ~ X ( lm, glm )}
+\item{normalize}{whether the weights should be normalized (sum to 1), default = FALSE to maintain comparability}
 
 \item{...}{other optional arguments to the model}
 }
 \value{
-a named vector with the relative importance for each feature in X
+a named vector with the sorted relative importance (weights) for each feature in X
 }
 \description{
 This wrapper method for feature importance ranking calculates an importance
 metric for each feature corresponding to the sum of ratios of model coefficients (or weights)
-to the model goodness of fit for a set of fitted models which each exclude one feature.
+to the model goodness of fit for the set of all models with 1 feature excluded.
 }
 \examples{
+set.seed(2020)
 X <- mtcars[,-1]
 y <- mtcars[,1]
-GOFFI(X, y)
+GOFFI(X, y, model = 'lm', metric = 'error')
+GOFFI(X, y, model = 'lm', metric = 'AIC')
+GOFFI(X, y, model = 'lm', metric = 'BIC')
+GOFFI(X, y, model = 'rf', metric = 'error')
 }
