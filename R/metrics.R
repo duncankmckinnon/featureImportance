@@ -1,5 +1,7 @@
 
 
+
+
 #' Goodness of Fit Feature Importance
 #' @description This wrapper method for feature importance ranking calculates an importance
 #' metric for each feature corresponding to the sum of ratios of model coefficients (or weights)
@@ -22,7 +24,14 @@
 #' GOFFI(X, y, model = 'lm', metric = 'AIC')
 #' GOFFI(X, y, model = 'lm', metric = 'BIC')
 #' GOFFI(X, y, model = 'rf', metric = 'error')
-GOFFI <- function( X, y, model = c( 'lm', 'glm', 'rf' ), metric = c( 'error', 'AIC', 'BIC' ), normalize = FALSE, ...) {
+GOFFI <- function( X, y, model = c( 'lm', 'glm', 'rf' ), metric = c( 'error', 'AIC', 'BIC' ), normalize = FALSE, ...) try({
+
+  # validate data
+  stopifnot( 'X must be a data.frame' = is.data.frame( X ),
+             'y must be a vector' = is.vector( y ),
+             'Number of rows in X must match y' = dim( X )[ 1 ] == length( y ),
+             'All columns in X must be numeric' = all( sapply( X, is.numeric) ) )
+
   ncols <- dim( X )[2]
   xcols <- if( !is.null( names( X ) ) ) { names( X ) } else { 1:ncols }
   FI <- stats::setNames( rep( 0, ncols ), xcols )
@@ -45,7 +54,7 @@ GOFFI <- function( X, y, model = c( 'lm', 'glm', 'rf' ), metric = c( 'error', 'A
     weights <- weights / sum( weights )
   }
   return( weights )
-}
+})
 
 #' models selector for wrapper importance methods
 #' @keywords internal
@@ -53,7 +62,8 @@ models <- function( name, metric, mod_args = list() ){
   switch( name,
           lm = list( model = stats::lm, metric = metric, args = mod_args, weight = 'coefficients', error = 'residuals' ),
           glm = list( model = stats::glm, metric = metric, args = mod_args, weight = 'coefficients', error = 'residuals' ),
-          rf = list( model = randomForest::randomForest, metric = 'error', args = combine.lists( list( 'importance' = TRUE, 'type' = 2 ), mod_args), weight = 'importance', error = 'rferror' ) )
+          rf = list( model = randomForest::randomForest, metric = 'error', args = combine.lists( list( 'importance' = TRUE, 'type' = 2 ), mod_args), weight = 'importance', error = 'rferror' ),
+          stop( paste0('model \"', name, '\" not supported'), call. = FALSE ) )
 }
 
 #' metrics selector for wrapper importance methods
@@ -66,7 +76,8 @@ metrics <- function( spec, mod, ...) {
                                             regression = sum( mod[['mse']] ),
                                             classification = sum( mod[['err.rate']] ) ) ),
           AIC = 1 / stats::AIC( mod, ... ),
-          BIC = 1 / stats::BIC( mod, ... ) )
+          BIC = 1 / stats::BIC( mod, ... ),
+          stop( paste0('metric \"', spec$metric, '\" not supported'), call. = FALSE ) )
 }
 
 #' weights selector for wrapper importance methods
@@ -76,5 +87,6 @@ weights <- function( spec, mod, ... ) {
           coefficients = stats::coefficients( mod ),
           importance = switch( mod$type,
                   regression = randomForest::importance( mod, type = 2 )[, 1],
-                  classification = randomForest::importance( mod )[, spec[['args']][['type']]] ) )
+                  classification = randomForest::importance( mod )[, spec[['args']][['type']]] ),
+          stop( paste0('weight \"', spec$weight, '\" not supported'), call. = FALSE ) )
 }
